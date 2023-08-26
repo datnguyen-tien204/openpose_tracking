@@ -1,0 +1,19 @@
+#if with CPU
+#Dat Nguyen Tien
+#datnguyen-tien204 #Using python==3.7.16
+keras==2.3.1
+tensorflow==2.1.0
+scipy==1.4.1
+opencv-python==4.8.0.76
+scikit-learn==1.0.2
+h5py==2.9.0
+# #if with GPU
+# tensorflow-gpu==1.13.1
+# opencv-python==3.4.2.17
+# keras==2.2.4
+# scipy==1.4.1
+# scikit-learn==1.0.2
+#h5py==2.9.0
+
+
+
