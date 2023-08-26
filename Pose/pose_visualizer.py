@@ -6,6 +6,7 @@ from .coco_format import CocoPart, CocoColors, CocoPairsRender
 from .pose_estimator import estimate
 
 
+
 class TfPoseVisualizer:
     # the thickness of showing skeleton
     Thickness_ratio = 2
@@ -17,6 +18,7 @@ class TfPoseVisualizer:
             graph_def = tf.compat.v1.GraphDef()
             graph_def.ParseFromString(f.read())
 
+        tf.compat.v1.disable_eager_execution()
         self.graph = tf.compat.v1.get_default_graph()
         tf.import_graph_def(graph_def, name='TfPoseEstimator')
         self.persistent_sess = tf.compat.v1.Session(graph=self.graph)

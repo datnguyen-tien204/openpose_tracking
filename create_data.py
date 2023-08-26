@@ -9,6 +9,12 @@ from Action.recognizer import load_action_premodel, framewise_recognize
 from warnings import filterwarnings
 filterwarnings(action='ignore', category=DeprecationWarning, message='`np.bool` is a deprecated alias')
 import pandas as pd
+import os
+import requests
+current_struct_time = time.localtime()
+formatted_time = time.strftime("%d/%m/%Y %H:%M:%S", current_struct_time)
+baseUrl='https://api.telegram.org/bot6217962481:AAElrXjC0iR3wg1csX7ex-jaURJk1EbNOdk/sendPhoto'
+
 
 # Load models
 estimator = load_pretrain_model('VGG_origin')
@@ -19,11 +25,14 @@ fps_interval = 1
 start_time = time.time()
 fps_count = 0
 frame_count = 0
+frame_count2=0
+capture_images = False
+output_folder = 'ViPham'
 
 dongtac = input("Hay nhap dong tac: ")
 
 # Choose video source
-cap = choose_run_mode('mobile.mp4')
+cap = choose_run_mode('data.mp4')
 video_writer = set_video_writer(cap, write_fps=int(7.0))
 
 # Initialize joint data file
@@ -33,6 +42,10 @@ f.write('\n')
 
 csv_file = open(f'{dongtac}.csv', 'w', newline='', encoding='utf-8')
 writer = csv.writer(csv_file, quoting=csv.QUOTE_MINIMAL)
+
+
+
+
 while cv.waitKey(1) < 0:
     has_frame, show = cap.read()
     if has_frame:
@@ -41,7 +54,7 @@ while cv.waitKey(1) < 0:
 
         humans = estimator.inference(show)
         pose = TfPoseVisualizer.draw_pose_rgb(show, humans)
-        show = framewise_recognize(pose, action_classifier)
+        show,init_label = framewise_recognize(pose, action_classifier)
 
         height, width = show.shape[:2]
         # Calculate and show FPS
@@ -63,7 +76,41 @@ while cv.waitKey(1) < 0:
         time_frame_label = '[Time:{0:.2f} | Frame:{1}]'.format(run_time, frame_count)
         cv.putText(show, time_frame_label, (5, height-15), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
 
+        #Show Frame
         cv.imshow('Phat hien gian lan', show)
+
+        if init_label == "operate":
+            if not capture_images:  # Nếu đang không trong trạng thái chụp ảnh
+                capture_images = True  # Bắt đầu chế độ chụp ảnh
+                frame_count2 = 0  # Đặt lại đếm số lượng ảnh chụp được
+
+            if capture_images:
+                frame_filename = os.path.join(output_folder, f"{init_label}_{frame_count2}.png")
+                cv.imwrite(frame_filename, show)
+                frame_count2 += 1
+
+                try:
+                    my_file = open(frame_filename, "rb")
+                    phong = '413'
+                    parameters = {
+                        "chat_id": "-984762057",
+                        "caption": f"Thoi gian: {formatted_time}" + "," + f"Noi dung vi pham: {init_label}','Phong:{phong}"
+                    }
+
+                    files = {
+                        "photo": my_file
+                    }
+                    resp = requests.get(baseUrl, data=parameters, files=files)
+                except:
+                    pass
+
+        else:
+            capture_images = False
+
+
+
+
+        #Luu file
         video_writer.write(show)
 
         joints_norm_per_frame = np.array(pose[-1]).astype(np.str_)

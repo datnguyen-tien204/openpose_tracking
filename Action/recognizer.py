@@ -9,6 +9,7 @@ from Tracking import generate_dets as gdet
 from Tracking.deep_sort.tracker import Tracker
 from keras.models import load_model
 from .action_enum import Actions
+import os
 
 
 # Use Deep-sort(Simple Online and Realtime Tracking)
@@ -103,6 +104,9 @@ def load_action_premodel(model):
 def framewise_recognize(pose, pretrained_model):
     frame, joints, bboxes, xcenter = pose[0], pose[1], pose[2], pose[3]
     joints_norm_per_frame = np.array(pose[-1])
+    global init_label
+    init_label=None
+    frame_count=0
 
     if bboxes:
         bboxes = np.array(bboxes)
@@ -156,10 +160,14 @@ def framewise_recognize(pose, pretrained_model):
                 # 显示动作类别
                 cv.putText(frame, init_label, (xmin + 80, ymin - 45), cv.FONT_HERSHEY_SIMPLEX, 1, trk_clr, 2)
                 # 异常预警(under scene)
-                if init_label == 'fall_down':
+                if init_label == 'operate':
+                    #frame_count += 1
                     cv.putText(frame, 'WARNING: someone is falling down!', (20, 60), cv.FONT_HERSHEY_SIMPLEX,
-                               1.5, (0, 0, 255), 4)
+                               1.5, (0, 0, 255), 1)
+                    # output_folder='ViPham'
+                    # frame_filename = os.path.join(output_folder, f"{init_label}.png")
+                    # cv.imwrite(frame_filename, frame)
             # 画track_box
             cv.rectangle(frame, (xmin - 10, ymin - 30), (xmax + 10, ymax), trk_clr, 2)
-    return frame
+    return frame,init_label
 
