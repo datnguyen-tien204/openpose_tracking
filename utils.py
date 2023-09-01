@@ -6,33 +6,33 @@ from pathlib import Path
 from Pose.pose_visualizer import TfPoseVisualizer
 
 file_path = Path.cwd()
-out_file_path = Path(file_path / "test_out/")
+# out_file_path = file_path.joinpath("test_out")
 # camera resolution setting
 cam_width, cam_height = 1280, 720
 # input size to the model
 # VGG trained in 656*368; mobilenet_thin trained in 432*368 (from tf-pose-estimation)
-input_width, input_height = 656, 368
+input_width, input_height = 432, 368
 
 
 def choose_run_mode(video):
     """
     video or webcam
     """
-    global out_file_path
+    # global out_file_path
     if len(video)!=0:
         # Open the video file
         if not os.path.isfile(video):
             print("Input video file ", video, " doesn't exist")
             sys.exit(1)
         cap = cv.VideoCapture(video)
-        out_file_path = str(out_file_path / (video[:-4] + '_tf_out.mp4'))
+        # out_file_path = str('tf_out.mp4')
     else:
         # Webcam input
         cap = cv.VideoCapture(0)
         # 设置摄像头像素值
         cap.set(cv.CAP_PROP_FRAME_WIDTH, cam_width)
         cap.set(cv.CAP_PROP_FRAME_HEIGHT, cam_height)
-        out_file_path = str(out_file_path / 'webcam_tf_out.mp4')
+        # out_file_path = str(out_file_path/'webcam_tf_out.mp4')
     return cap
 
 
@@ -48,8 +48,8 @@ def load_pretrain_model(model):
     return TfPoseVisualizer(graph_path, target_size=(input_width, input_height))
 
 
-def set_video_writer(cap, write_fps=15):
-    return cv.VideoWriter(out_file_path,
-                          cv.VideoWriter_fourcc(*'mp4v'),
-                          write_fps,
-                          (round(cap.get(cv.CAP_PROP_FRAME_WIDTH)), round(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
+# def set_video_writer(cap, write_fps=15):
+#     return cv.VideoWriter(out_file_path,
+#                           cv.VideoWriter_fourcc(*'mp4v'),
+#                           write_fps,
+#                           (round(cap.get(cv.CAP_PROP_FRAME_WIDTH)), round(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
